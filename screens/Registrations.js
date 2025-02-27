@@ -7,6 +7,7 @@ import * as Font from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
 
 export default function Registrations({ navigation }) {
+  // State variables
   const [isLogin, setIsLogin] = useState(true);
   const animatedValue = useRef(new Animated.Value(0)).current;
   const [email, setEmail] = useState("");
@@ -18,7 +19,7 @@ export default function Registrations({ navigation }) {
     async function loadFont() {
       try {
         await Font.loadAsync({
-          'Necosmic': require('../assets/fonts/Necosmic.ttf'), // Ensure the path is correct
+          'Necosmic': require('../assets/fonts/Necosmic.ttf'),
         });
         setFontLoaded(true);
         await SplashScreen.hideAsync();
@@ -30,7 +31,7 @@ export default function Registrations({ navigation }) {
   }, []);
   if (!fontLoaded) return null;
 
-
+  // Function to toggle between login and sign up mode
   const toggleMode = () => {
     Animated.timing(animatedValue, {
       toValue: isLogin ? 1 : 0,
@@ -43,7 +44,7 @@ export default function Registrations({ navigation }) {
     });
   };
 
-  // Handle Login
+  // Function to handle login
   const handleLogin = async () => {
     if (!email || !password) {
       Alert.alert("Error", "Please enter both email and password.");
@@ -58,7 +59,7 @@ export default function Registrations({ navigation }) {
     }
   };
 
-  // Handle Sign Up
+  // Function to handle sign up
   const handleSignUp = async () => {
     if (!email || !password || !fullName) {
       Alert.alert("Error", "Please fill all fields.");
