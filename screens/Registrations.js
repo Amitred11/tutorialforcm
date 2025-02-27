@@ -18,14 +18,6 @@ export default function Registrations({ navigation }) {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   useEffect(() => {
-/*************  ✨ Codeium Command ⭐  *************/
-/**
- * Loads the Necosmic font asynchronously and updates the state to indicate the font is loaded.
- * Prevents the splash screen from hiding until the font is fully loaded.
- * In case of an error during loading, logs the error to the console.
- */
-
-/******  1d6432fd-22f5-4aa0-8932-ae154183b0d2  *******/
     async function loadFont() {
       try {
         await Font.loadAsync({
@@ -89,7 +81,7 @@ export default function Registrations({ navigation }) {
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+      <TouchableOpacity style={styles.backButton} onPress={() => navigation.navigate('Welcome')}>
         <Ionicons name="arrow-back" size={28} color="#333" />
       </TouchableOpacity>
       <Text style={styles.brand}>Fibear Network Tech.</Text>
