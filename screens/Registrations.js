@@ -2,20 +2,30 @@ import React, { useState, useRef, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Animated, Easing, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { auth } from '../config/firebaseConfig';
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from "firebase/auth";
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import * as Font from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
 
 export default function Registrations({ navigation }) {
-  // State variables
   const [isLogin, setIsLogin] = useState(true);
   const animatedValue = useRef(new Animated.Value(0)).current;
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [fullName, setFullName] = useState(""); 
   const [fontLoaded, setFontLoaded] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   useEffect(() => {
+/*************  ✨ Codeium Command ⭐  *************/
+/**
+ * Loads the Necosmic font asynchronously and updates the state to indicate the font is loaded.
+ * Prevents the splash screen from hiding until the font is fully loaded.
+ * In case of an error during loading, logs the error to the console.
+ */
+
+/******  1d6432fd-22f5-4aa0-8932-ae154183b0d2  *******/
     async function loadFont() {
       try {
         await Font.loadAsync({
@@ -29,9 +39,9 @@ export default function Registrations({ navigation }) {
     }
     loadFont();
   }, []);
+
   if (!fontLoaded) return null;
 
-  // Function to toggle between login and sign up mode
   const toggleMode = () => {
     Animated.timing(animatedValue, {
       toValue: isLogin ? 1 : 0,
@@ -44,7 +54,6 @@ export default function Registrations({ navigation }) {
     });
   };
 
-  // Function to handle login
   const handleLogin = async () => {
     if (!email || !password) {
       Alert.alert("Error", "Please enter both email and password.");
@@ -53,36 +62,38 @@ export default function Registrations({ navigation }) {
     try {
       await signInWithEmailAndPassword(auth, email, password);
       Alert.alert("Success", "Logged in successfully!");
-      navigation.navigate("Home"); // Redirect after login
+      navigation.navigate("Home"); 
     } catch (error) {
-      Alert.alert("Login Failed");
+      Alert.alert("Login Failed", error.message);
     }
   };
 
-  // Function to handle sign up
   const handleSignUp = async () => {
     if (!email || !password || !fullName) {
       Alert.alert("Error", "Please fill all fields.");
       return;
     }
+    if (password !== confirmPassword) {
+      Alert.alert("Error", "Passwords do not match.");
+      return;
+    }
     try {
-      await createUserWithEmailAndPassword(auth, email, password);
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      await updateProfile(userCredential.user, { displayName: fullName });
       Alert.alert("Success", "Account created successfully!");
       setIsLogin(true);
     } catch (error) {
-      Alert.alert("Sign Up Failed");
+      Alert.alert("Sign Up Failed", error.message);
     }
   };
 
   return (
     <View style={styles.container}>
-      {/* Back Button */}
       <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
         <Ionicons name="arrow-back" size={28} color="#333" />
       </TouchableOpacity>
       <Text style={styles.brand}>Fibear Network Tech.</Text>
 
-      {/* Login/Sign Up Toggle */}
       <View style={styles.tabContainer}>
         <TouchableOpacity style={[styles.tab, isLogin && styles.activeTab]} onPress={() => !isLogin && toggleMode()}>
           <Text style={[styles.tabText, isLogin && styles.activeTabText]}>Login</Text>
@@ -92,7 +103,6 @@ export default function Registrations({ navigation }) {
         </TouchableOpacity>
       </View>
 
-      {/* Animated Form */}
       <Animated.View
         style={[
           styles.formContainer,
@@ -105,19 +115,79 @@ export default function Registrations({ navigation }) {
           },
         ]}
       >
-        {isLogin ? (
-          <>
-            <TextInput style={styles.input} placeholder="Email" placeholderTextColor="#777" value={email} onChangeText={setEmail} />
-            <TextInput style={styles.input} placeholder="Password" secureTextEntry placeholderTextColor="#777" value={password} onChangeText={setPassword} />
-          </>
-        ) : (
-          <>
-            <TextInput style={styles.input} placeholder="Full Name" placeholderTextColor="#777" value={fullName} onChangeText={setFullName} onBlur={() => updateProfile(auth.currentUser, { displayName: fullName })} />
-            <TextInput style={styles.input} placeholder="Email" placeholderTextColor="#777" value={email} onChangeText={setEmail} />
-            <TextInput style={styles.input} placeholder="Create Password" secureTextEntry placeholderTextColor="#777" value={password} onChangeText={setPassword} />
-            <TextInput style={styles.input} placeholder="Confirm Password" secureTextEntry placeholderTextColor="#777" value={password} onChangeText={setPassword} />
-          </>
-        )}
+{isLogin ? (
+  <>
+    <View style={styles.inputContainer}>
+      <TextInput
+        style={styles.input}
+        placeholder="Email"
+        placeholderTextColor="#777"
+        value={email}
+        onChangeText={setEmail}
+      />
+    </View>
+    <View style={styles.inputContainer}>
+      <TextInput
+        style={styles.input}
+        placeholder="Password"
+        secureTextEntry={!showPassword}
+        placeholderTextColor="#777"
+        value={password}
+        onChangeText={setPassword}
+      />
+      <TouchableOpacity style={styles.eyeIcon} onPress={() => setShowPassword(!showPassword)}>
+        <Ionicons name={showPassword ? 'eye' : 'eye-off'} size={24} color="#777" />
+      </TouchableOpacity>
+    </View>
+  </>
+) : (
+  <>
+    <View style={styles.inputContainer}>
+      <TextInput
+        style={styles.input}
+        placeholder="Full Name"
+        placeholderTextColor="#777"
+        value={fullName}
+        onChangeText={setFullName}
+      />
+    </View>
+    <View style={styles.inputContainer}>
+      <TextInput
+        style={styles.input}
+        placeholder="Email"
+        placeholderTextColor="#777"
+        value={email}
+        onChangeText={setEmail}
+      />
+    </View>
+    <View style={styles.inputContainer}>
+      <TextInput
+        style={styles.input}
+        placeholder="Create Password"
+        secureTextEntry={!showPassword}
+        placeholderTextColor="#777"
+        value={password}
+        onChangeText={setPassword}
+      />
+      <TouchableOpacity style={styles.eyeIcon} onPress={() => setShowPassword(!showPassword)}>
+        <Ionicons name={showPassword ? 'eye' : 'eye-off'} size={24} color="#777" />
+      </TouchableOpacity>
+    </View>
+    <View style={styles.inputContainer}>
+      <TextInput
+        style={styles.input}
+        placeholder="Confirm Password"
+        secureTextEntry={!showConfirmPassword}
+        placeholderTextColor="#777"
+        value={confirmPassword}
+        onChangeText={setConfirmPassword}
+      />
+      <TouchableOpacity style={styles.eyeIcon} onPress={() => setShowConfirmPassword(!showConfirmPassword)}>
+        <Ionicons name={showConfirmPassword ? 'eye' : 'eye-off'} size={24} color="#777" />
+      </TouchableOpacity>
+    </View>
+  </>
+)}
 
         <TouchableOpacity style={styles.button} onPress={isLogin ? handleLogin : handleSignUp}>
           <Text style={styles.buttonText}>{isLogin ? 'Login' : 'Sign Up'}</Text>
@@ -137,8 +207,19 @@ const styles = StyleSheet.create({
   tabText: { fontSize: 18, fontWeight: 'bold', color: '#333' },
   activeTabText: { color: '#fff' },
   formContainer: { width: '90%', backgroundColor: '#fff', padding: 25, borderRadius: 15, elevation: 8, shadowColor: '#000', shadowOpacity: 0.15, shadowOffset: { width: 0, height: 4 }, shadowRadius: 5, alignItems: 'center' },
-  input: { width: '100%', borderBottomWidth: 1, borderBottomColor: '#007bff', marginBottom: 18, padding: 12, fontSize: 16, color: '#000', backgroundColor: '#f8f9fa', borderRadius: 8 },
-  button: { backgroundColor: '#007bff', paddingVertical: 14, borderRadius: 10, alignItems: 'center', marginTop: 25, width: '100%', elevation: 3 },
+  input: { width: '100%', borderBottomWidth: 1, borderBottomColor: '#007bff', marginBottom: 18, padding: 12, fontSize: 16, color: '#000' },
+  button: { backgroundColor: '#007bff', paddingVertical: 14, borderRadius: 10, alignItems: 'center', marginTop: 25, width: '100%' },
   buttonText: { fontSize: 16, fontWeight: 'bold', color: '#fff' },
+  inputContainer: {
+    position: 'relative',
+    width: '100%',
+    marginBottom: 18,
+  },
+  eyeIcon: {
+    position: 'absolute',
+    right: 15,
+    top: '20%',
+    transform: [{ translateY: -12 }],
+  },
 });
 
