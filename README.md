@@ -8,7 +8,6 @@ This capstone project is designed to develop a comprehensive postpaid management
 - **Plan Management**: Users can view their current plan details.
 - **Billing & Payment Tracking**: Displays billing cycle, current bill, and due date.
 - **Notifications**: Alerts for upcoming due dates and other important updates.
-- **Admin Dashboard**: For managing user accounts and subscriptions.
 
 ## Technologies Used
 - **Frontend**: React Native
@@ -52,6 +51,7 @@ This project is expected to be completed within **7 months**, with the following
 - **Month 5**: Testing & Debugging
 - **Month 6**: Deployment Preparation
 - **Month 7**: Final Testing & Documentation
+- **Kunwari lang**
 
 ## Contributors
 - **Developer:** Leoncio D. Amadore III
