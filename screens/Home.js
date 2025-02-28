@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView, StatusBar, Modal, Image, Animated } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView, StatusBar, Modal, Image, Animated, ActivityIndicator } from 'react-native';
 import { Ionicons, MaterialIcons, FontAwesome5 } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { StackActions } from '@react-navigation/native';
 import { auth } from '../config/firebaseConfig';
+import axios from 'axios';
 
 const newsData = [
   { id: '1', title: 'FiberX Expands Coverage Nationwide', source: 'TechDaily', url: 'https://techdaily.com/fiberx-expansion' },
@@ -11,12 +12,17 @@ const newsData = [
   { id: '3', title: 'Top Tips for Maximizing Your Fiber Speed', source: 'NetExperts', url: 'https://netexperts.com/speed-tips' },
 ];
 
-export default function Home({ navigation }) {
+export default function Home({ navigation}) {
   const [sidebarVisible, setSidebarVisible] = useState(false);
   const slideAnim = useState(new Animated.Value(0))[0];
   const [profileName] = useState(auth.currentUser?.displayName || 'User');
   const [profileEmail] = useState(auth.currentUser?.email || 'No email available');
   const [profileImage] = useState(require('../assets/profile.jpg'));
+  const [speedTestVisible, setSpeedTestVisible] = useState(false);
+  const [isTesting, setIsTesting] = useState(false);
+  const [downloadSpeed, setDownloadSpeed] = useState(null);
+  const [uploadSpeed, setUploadSpeed] = useState(null);
+  const [ping, setPing] = useState(null);
 
   const toggleSidebar = (isOpen) => {
     setSidebarVisible(isOpen);
@@ -31,7 +37,53 @@ export default function Home({ navigation }) {
     toggleSidebar(false);
     navigation.dispatch(StackActions.replace('Registrations'));
   };
+  const startSpeedTest = async () => {
+    setIsTesting(true);
+    setDownloadSpeed(null);
+    setUploadSpeed(null);
+    setPing(null);
 
+    try {
+      // ✅ Measure Ping (Latency)
+      const pingStart = performance.now();
+      await axios.get("https://www.cloudflare.com/cdn-cgi/trace");
+      const pingEnd = performance.now();
+      const pingTime = pingEnd - pingStart;
+      setPing(pingTime.toFixed(2));
+
+      // ✅ Measure Download Speed
+      const downloadStart = performance.now();
+      const response = await axios.get("https://speed.cloudflare.com/__down?bytes=25000000", {
+        responseType: "arraybuffer",
+      });
+      const downloadEnd = performance.now();
+
+      const fileSizeInBits = response.data.byteLength * 8;
+      const downloadTimeInSeconds = (downloadEnd - downloadStart) / 1000;
+      const downloadSpeedMbps = (fileSizeInBits / downloadTimeInSeconds) / 1_000_000;
+      setDownloadSpeed(downloadSpeedMbps.toFixed(2));
+
+      // ✅ Measure Upload Speed
+      const uploadData = new Uint8Array(5 * 1024 * 1024); // 5MB file (random data)
+      const uploadStart = performance.now();
+      await axios.post("https://speed.cloudflare.com/__up", uploadData, {
+        headers: { "Content-Type": "application/octet-stream" },
+      });
+      const uploadEnd = performance.now();
+
+      const uploadFileSizeInBits = uploadData.byteLength * 8;
+      const uploadTimeInSeconds = (uploadEnd - uploadStart) / 1000;
+      const uploadSpeedMbps = (uploadFileSizeInBits / uploadTimeInSeconds) / 1_000_000;
+      setUploadSpeed(uploadSpeedMbps.toFixed(2));
+
+    } catch (error) {
+      console.error("Speed test failed:", error);
+    }
+
+    setIsTesting(false);
+  };
+
+  
   return (
     <View style={styles.safeContainer}>
       <StatusBar barStyle="light-content" backgroundColor="#0044cc" />
@@ -117,7 +169,7 @@ export default function Home({ navigation }) {
 
         {/* Features */}
         <View style={styles.featureCard}>
-          <TouchableOpacity style={styles.featureButton} onPress={() => alert('Speed test coming soon!')}>
+          <TouchableOpacity style={styles.featureButton} onPress={() => setSpeedTestVisible(true)}>
             <FontAwesome5 name="tachometer-alt" size={24} color="#28a745" />
             <Text style={styles.featureText}>Speed Test</Text>
           </TouchableOpacity>
@@ -140,6 +192,32 @@ export default function Home({ navigation }) {
           <View style={{ height: 50 }} />
         </View>
       </View>
+
+      <Modal visible={speedTestVisible} transparent animationType="slide">
+  <View style={styles.modalOverlayed}>
+    <View style={styles.modalContented}>
+      <Text style={styles.modalTitled}>Internet Speed Test</Text>
+
+      {isTesting ? (
+        <ActivityIndicator size="large" color="#0044cc" />
+      ) : (
+        <>
+          <Text style={styles.speedTexted}>Download: {downloadSpeed ? `${downloadSpeed} Mbps` : '--'}</Text>
+          <Text style={styles.speedTexted}>Upload: {uploadSpeed ? `${uploadSpeed} Mbps` : '--'}</Text>
+          <Text style={styles.speedTexted}>Ping: {ping ? `${ping} ms` : '--'}</Text>
+        </>
+      )}
+ 
+       <TouchableOpacity style={styles.modalButtoned} onPress={startSpeedTest} disabled={isTesting}>
+            <Text style={styles.modalButtonTexted}>{isTesting ? 'Testing...' : 'Start Test'}</Text>
+          </TouchableOpacity>
+
+      <TouchableOpacity style={styles.closeButtoned} onPress={() => setSpeedTestVisible(false)}>
+        <Text style={styles.closeButtonTexted}>Close</Text>
+      </TouchableOpacity>
+    </View>
+  </View>
+</Modal>
     </ScrollView>
   </View>
   );
@@ -232,4 +310,59 @@ const styles = StyleSheet.create({
   newsItem: { backgroundColor: '#fff', padding: 12, borderRadius: 8, marginBottom: 10, elevation: 3 },
   newsTitle: { fontSize: 16, fontWeight: 'bold', color: '#0044cc' },
   newsSource: { fontSize: 12, color: '#666', marginTop: 3 },
+
+  modalOverlayed: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.6)', // Slightly darker overlay
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContented: {
+    width: '85%',
+    backgroundColor: '#fff',
+    padding: 25,
+    borderRadius: 15,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOpacity: 0.3,
+    shadowRadius: 10,
+    elevation: 10, // Shadow for Android
+  },
+  modalTitled: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    marginBottom: 15,
+    color: '#333',
+  },
+  speedTexted: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginVertical: 8,
+    color: '#0044cc',
+  },
+  speedUnit: {
+    fontSize: 16,
+    color: '#555',
+  },
+  modalButtoned: {
+    backgroundColor: '#0044cc',
+    paddingVertical: 12,
+    borderRadius: 8,
+    marginTop: 20,
+    width: '100%',
+    alignItems: 'center',
+  },
+  modalButtonTexted: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  closeButtoned: {
+    marginTop: 15,
+  },
+  closeButtonTexted: {
+    color: '#d9534f',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
 });
