@@ -1,10 +1,21 @@
 import React, {useState} from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView, StatusBar, Modal } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView, StatusBar, Modal, Image } from 'react-native';
 import { Ionicons, MaterialIcons, FontAwesome5 } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import { auth } from '../config/firebaseConfig';
 
 export default function Bill({ navigation }) {
     const [sidebarVisible, setSidebarVisible] = useState(false);
+    const [profileName] = useState(auth.currentUser?.displayName || 'User');
+    const [profileEmail] = useState(auth.currentUser?.email || 'No email available');
+    const [profileImage] = useState(require('../assets/profile.jpg'));
+
+    const historyData = [
+      { id: 1, date: 'Jan 15, 2024', amount: '₱2,499', status: 'Paid' },
+      { id: 2, date: 'Dec 15, 2023', amount: '₱2,499', status: 'Paid' },
+      { id: 3, date: 'Nov 15, 2023', amount: '₱2,499', status: 'Paid' },
+    ];
+  
 
     const toggleSidebar = (isOpen) => {
       setSidebarVisible(isOpen);
@@ -21,8 +32,8 @@ export default function Bill({ navigation }) {
       {/* Header */}
       <LinearGradient colors={['#0044cc', '#002b80']} style={styles.header}>
         <View style={styles.headerContent}>
-          <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Ionicons name="menu" size={28} color="#fff" />
+        <TouchableOpacity onPress={() => toggleSidebar(true)}>
+            <Ionicons name="menu" size={28} color="#fff" />
           </TouchableOpacity>
           <Text style={styles.headerText}>Billing & Payments</Text>
           <TouchableOpacity onPress={() => alert('No new notifications')}>
@@ -37,7 +48,11 @@ export default function Bill({ navigation }) {
             <TouchableOpacity onPress={() => setSidebarVisible(false)} style={styles.closeButton}>
               <Ionicons name="close" size={28} color="#333" left="86%" />
             </TouchableOpacity>
-            <Text style={styles.sidebarTitle}>Account Menu</Text>
+            <View style={styles.sidebarProfile}>
+              <Image source={profileImage} style={styles.sidebarProfilePic} />
+              <Text style={styles.sidebarProfileName}>{profileName}</Text>
+              <Text style={styles.sidebarProfileEmail}>{profileEmail}</Text>
+            </View>
             {[ 
               { icon: 'home', text: 'Home', onPress: () => navigation.navigate('Home') },
               { icon: 'account-circle', text: 'My Account', onPress: () => navigation.navigate('Account') },
@@ -77,6 +92,19 @@ export default function Bill({ navigation }) {
               </TouchableOpacity>
             ))}
           </View>
+        </View>
+        
+        <View style={styles.historyContainer}>
+        <Text style={styles.historytitle}>Billing History</Text>
+        {historyData.map((item) => (
+          <View key={item.id} style={styles.historyItem}>
+            <Text style={styles.date}>{item.date}</Text>
+            <Text style={styles.amount}>{item.amount}</Text>
+            <Text style={[styles.status, item.status === 'Paid' ? styles.paid : styles.unpaid]}>
+              {item.status}
+            </Text>
+          </View>
+        ))}
         </View>
       </ScrollView>
     </View>
@@ -120,6 +148,21 @@ const styles = StyleSheet.create({
     shadowColor: '#000', 
     marginBottom: 20 
   },
+
+  modalOverlay: { flex: 1, backgroundColor: 'rgba(0, 0, 0, 0.5)', justifyContent: 'flex-start' },
+  sidebar: { width: '70%', backgroundColor: '#fff', height: '100%', padding: 20, borderTopRightRadius: 20, borderBottomRightRadius: 20 },
+  sidebarProfile: { alignItems: 'center', marginBottom: 20 },
+  sidebarProfilePic: { width: 60, height: 60, borderRadius: 30 },
+  sidebarProfileName: { fontSize: 16, fontWeight: 'bold' },
+  sidebarProfileEmail: { fontSize: 14, color: '#555' },
+  sidebarItem: { flexDirection: 'row', alignItems: 'center', paddingVertical: 15 },
+  sidebarText: { fontSize: 16, marginLeft: 10 },
+  profileCard: { alignItems: 'center', backgroundColor: '#fff', padding: 20, borderRadius: 10, marginBottom: 20 },
+  profilePic: { width: 80, height: 80, borderRadius: 40, marginBottom: 10 },
+  profileName: { fontSize: 18, fontWeight: 'bold' },
+  profileEmail: { fontSize: 14, color: '#555' },
+
+
   title: { fontSize: 18, fontWeight: 'bold', color: '#333' },
   usage: { fontSize: 14, color: '#555', marginTop: 5 },
   highlight: { color: '#0044cc', fontWeight: 'bold' },
@@ -133,4 +176,48 @@ const styles = StyleSheet.create({
   quickActions: { flexDirection: 'row', justifyContent: 'space-around', marginBottom: 20 },
   actionButton: { alignItems: 'center', backgroundColor: '#fff', padding: 15, borderRadius: 10, elevation: 3, width: 100 },
   actionText: { fontSize: 14, fontWeight: 'bold', marginTop: 5, color: '#0044cc' },
+
+  historyContainer: { 
+    backgroundColor: '#fff', 
+    borderRadius: 10, 
+    padding: 15, 
+    shadowColor: '#000', 
+    shadowOpacity: 0.2, 
+    shadowOffset: { width: 0, height: 2 }, 
+    shadowRadius: 4, 
+    elevation: 5,
+    width: "90%",
+    alignSelf: 'center'
+  },
+  historytitle: { 
+    fontSize: 30, 
+    fontWeight: 'bold',
+    marginBottom: 10,
+    alignSelf: 'center',
+  },
+  historyItem: { 
+    flexDirection: 'row', 
+    justifyContent: 'space-between', 
+    paddingVertical: 12, 
+    borderBottomWidth: 1, 
+    borderBottomColor: '#ddd' 
+  },
+  date: { 
+    fontSize: 16, 
+    color: '#333' 
+  },
+  amount: { 
+    fontSize: 16, 
+    fontWeight: 'bold' 
+  },
+  status: { 
+    fontSize: 14, 
+    fontWeight: 'bold' 
+  },
+  paid: { 
+    color: '#28a745' 
+  },
+  unpaid: { 
+    color: '#d9534f' 
+  }
 });

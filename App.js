@@ -7,6 +7,7 @@ import Home from './screens/Home';
 import Account from './screens/Account';
 import Bills from './screens/Bills';
 import TechSupp from './screens/TechSupp';
+import ForgotPassword from './screens/ForgotPassword';
 
 
 const Stack = createStackNavigator();
@@ -22,6 +23,7 @@ export default function App() {
         <Stack.Screen name="Account" component={Account} options={{ headerShown: false }} />
         <Stack.Screen name="Bills" component={Bills} options={{ headerShown: false }} />
         <Stack.Screen name="TechSupp" component={TechSupp} options={{ headerShown: false }} />
+        <Stack.Screen name="ForgotPassword" component={ForgotPassword} options={{ headerShown: false }} />
       </Stack.Navigator>
     </NavigationContainer>
   );

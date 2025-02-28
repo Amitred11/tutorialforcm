@@ -34,6 +34,8 @@ export default function Registrations({ navigation }) {
 
   if (!fontLoaded) return null;
 
+  
+
   const toggleMode = () => {
     Animated.timing(animatedValue, {
       toValue: isLogin ? 1 : 0,
@@ -73,7 +75,7 @@ export default function Registrations({ navigation }) {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       await updateProfile(userCredential.user, { displayName: fullName });
       Alert.alert("Success", "Account created successfully!");
-      setIsLogin(true);
+      navigation.navigate("Home"); 
     } catch (error) {
       Alert.alert("Sign Up Failed", error.message);
     }
@@ -180,6 +182,10 @@ export default function Registrations({ navigation }) {
     </View>
   </>
 )}
+      
+      <TouchableOpacity style={styles.forgotPassword} onPress={() => navigation.navigate('ForgotPassword')}>
+        <Animated.Text style={[styles.forgotPasswordText]}>Forgot Password</Animated.Text>
+      </TouchableOpacity>
 
         <TouchableOpacity style={styles.button} onPress={isLogin ? handleLogin : handleSignUp}>
           <Text style={styles.buttonText}>{isLogin ? 'Login' : 'Sign Up'}</Text>
@@ -212,6 +218,18 @@ const styles = StyleSheet.create({
     right: 15,
     top: '20%',
     transform: [{ translateY: -12 }],
+  },
+  forgotPassword: {
+    marginTop: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  forgotPasswordText: {
+    fontSize: 16,
+    color: '#007bff',
+    textAlign: 'center',
+    textDecorationLine: 'underline',
+    fontFamily: 'Necosmic',
   },
 });
 

@@ -11,6 +11,8 @@ SplashScreen.preventAutoHideAsync();
 export default function WelcomeScreen() {
   const navigation = useNavigation();
   const [fontLoaded, setFontLoaded] = useState(false);
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const bounceAnim = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
     async function loadFont() {
@@ -26,23 +28,50 @@ export default function WelcomeScreen() {
     }
     loadFont();
   }, []);
-  if (!fontLoaded) return null;
 
+  useEffect(() => {
+    if (fontLoaded) {
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 1500,
+        easing: Easing.ease,
+        useNativeDriver: true,
+      }).start();
+    }
+  }, [fontLoaded]);
+
+  const handlePressIn = () => {
+    Animated.spring(bounceAnim, {
+      toValue: 0.9,
+      useNativeDriver: true,
+    }).start();
+  };
+
+  const handlePressOut = () => {
+    Animated.spring(bounceAnim, {
+      toValue: 1,
+      friction: 3,
+      useNativeDriver: true,
+    }).start(() => navigation.navigate('Registrations'));
+  };
+
+  if (!fontLoaded) return null;
 
   return (
     <View style={styles.container}>
-      <Animated.Text style={[styles.title ]}>
-        Welcome to FIBEAR NETWORK TECHNOLOGIES CORP.
-      </Animated.Text>
+      <Animated.Text style={[styles.title, { opacity: fadeAnim }]}>Welcome to</Animated.Text>
+      <Animated.Text style={[styles.companyName, { opacity: fadeAnim }]}>FIBEAR NETWORK TECHNOLOGIES CORP.</Animated.Text>
+      <Animated.Text style={[styles.subtitle, { opacity: fadeAnim }]}>Fast. Reliable. Unlimited.</Animated.Text>
 
-      <Text style={styles.subtitle}>Fast. Reliable. Unlimited.</Text>
-
-      <TouchableOpacity 
-        style={styles.button} 
-        onPress={() => navigation.navigate('Registrations')}
-      >
-        <Text style={styles.buttonText}>Get Started</Text>
-      </TouchableOpacity>
+      <Animated.View style={{ transform: [{ scale: bounceAnim }] }}>
+        <TouchableOpacity
+          style={[styles.button, { opacity: fadeAnim }]}
+          onPressIn={handlePressIn}
+          onPressOut={handlePressOut}
+        >
+          <Text style={[styles.buttonText ]}>Get Started</Text>
+        </TouchableOpacity>
+      </Animated.View>
 
       <StatusBar style="dark" />
     </View>
@@ -52,17 +81,24 @@ export default function WelcomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#f4f4f4',
     alignItems: 'center',
     justifyContent: 'center',
     padding: 20,
   },
   title: {
     fontSize: 24,
+    color: '#333',
+    textAlign: 'center',
+    fontFamily: 'Necosmic',
+    marginBottom: 5,
+  },
+  companyName: {
+    fontSize: 28,
     color: '#007bff',
     textAlign: 'center',
+    fontFamily: 'Necosmic',
     marginBottom: 10,
-    fontFamily: 'Necosmic', // Ensure this matches the loaded font
   },
   subtitle: {
     fontSize: 16,
@@ -72,18 +108,19 @@ const styles = StyleSheet.create({
   },
   button: {
     backgroundColor: '#007bff',
-    paddingVertical: 12,
-    paddingHorizontal: 40,
+    paddingVertical: 14,
+    paddingHorizontal: 50,
     borderRadius: 8,
     elevation: 5,
     shadowColor: '#000',
-    shadowOpacity: 0.2,
+    shadowOpacity: 0.3,
     shadowOffset: { width: 0, height: 3 },
     shadowRadius: 5,
   },
   buttonText: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: 'bold',
     color: '#fff',
+    textAlign: 'center',
   },
 });

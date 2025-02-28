@@ -3,6 +3,7 @@ import { View, Text, TouchableOpacity, StyleSheet, ScrollView, StatusBar, Modal,
 import { Ionicons, MaterialIcons, FontAwesome5 } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { StackActions } from '@react-navigation/native';
+import { auth } from '../config/firebaseConfig';
 
 const newsData = [
   { id: '1', title: 'FiberX Expands Coverage Nationwide', source: 'TechDaily', url: 'https://techdaily.com/fiberx-expansion' },
@@ -13,6 +14,9 @@ const newsData = [
 export default function Home({ navigation }) {
   const [sidebarVisible, setSidebarVisible] = useState(false);
   const slideAnim = useState(new Animated.Value(0))[0];
+  const [profileName] = useState(auth.currentUser?.displayName || 'User');
+  const [profileEmail] = useState(auth.currentUser?.email || 'No email available');
+  const [profileImage] = useState(require('../assets/profile.jpg'));
 
   const toggleSidebar = (isOpen) => {
     setSidebarVisible(isOpen);
@@ -46,20 +50,23 @@ export default function Home({ navigation }) {
         </View>
       </LinearGradient>
 
-      {/* Sidebar */}
       <Modal visible={sidebarVisible} transparent>
         <TouchableOpacity style={styles.modalOverlay} onPress={() => setSidebarVisible(false)}>
-          <View style={[styles.sidebar]}> 
+          <View style={styles.sidebar}> 
             <TouchableOpacity onPress={() => setSidebarVisible(false)} style={styles.closeButton}>
               <Ionicons name="close" size={28} color="#333" left="86%" />
             </TouchableOpacity>
-            <Text style={styles.sidebarTitle}>Account Menu</Text>
+            <View style={styles.sidebarProfile}>
+              <Image source={profileImage} style={styles.sidebarProfilePic} />
+              <Text style={styles.sidebarProfileName}>{profileName}</Text>
+              <Text style={styles.sidebarProfileEmail}>{profileEmail}</Text>
+            </View>
             {[ 
-              { icon: 'home', text: 'Home' },
+              { icon: 'home', text: 'Home', onPress: () => navigation.navigate('Home') },
               { icon: 'account-circle', text: 'My Account', onPress: () => navigation.navigate('Account') },
               { icon: 'receipt', text: 'Billing & Payments', onPress: () => navigation.navigate('Bills') },
               { icon: 'build', text: 'Technical Support', onPress: () => navigation.navigate('TechSupp') },
-              { icon: 'logout', text: 'Logout', onPress: () => handleLogout () }
+              { icon: 'logout', text: 'Logout', onPress: handleLogout }
             ].map((item, index) => (
               <TouchableOpacity key={index} style={styles.sidebarItem} onPress={item.onPress}>
                 <MaterialIcons name={item.icon} size={24} color="#333" />
@@ -69,19 +76,26 @@ export default function Home({ navigation }) {
           </View>
         </TouchableOpacity>
       </Modal>
-<ScrollView>
-      {/* Main Content */}
-      <View style={styles.container}>
-        {/* Account Overview */}
-        <View style={styles.card}>
-          <Text style={styles.title}>Plan: <Text style={styles.highlight}>FiberX 500 Mbps</Text></Text>
-          <Text style={styles.usage}>Billing Cycle: <Text style={styles.bold}>15th of Every Month</Text></Text>
-          <Text style={styles.usage}>Current Bill: <Text style={styles.balance}>₱2,499</Text></Text>
-          <Text style={styles.usage}>Due Date: <Text style={styles.warning}>March 15, 2025</Text></Text>
-          <TouchableOpacity style={styles.button}>
-            <Text style={styles.buttonText}>View Billing Details</Text>
-          </TouchableOpacity>
+
+      <ScrollView>
+        {/* Announcement Section */}
+        <View style={styles.announcementContainer}>
+          <Text style={styles.announcementTitle}>📢 Announcement</Text>
+          <Text style={styles.announcementText}>Enjoy our new 1Gbps FiberX Plan at a special promo price! Limited time only.</Text>
         </View>
+
+        {/* Main Content */}
+        <View style={styles.container}>
+          {/* Account Overview */}
+          <View style={styles.card}>
+            <Text style={styles.title}>Plan: <Text style={styles.highlight}>FiberX 500 Mbps</Text></Text>
+            <Text style={styles.usage}>Billing Cycle: <Text style={styles.bold}>15th of Every Month</Text></Text>
+            <Text style={styles.usage}>Current Bill: <Text style={styles.balance}>₱2,499</Text></Text>
+            <Text style={styles.usage}>Due Date: <Text style={styles.warning}>March 15, 2025</Text></Text>
+            <TouchableOpacity style={styles.button}>
+              <Text style={styles.buttonText}>View Billing Details</Text>
+            </TouchableOpacity>
+          </View>
         
         {/* Quick Actions */}
         <View style={styles.quickActions}>
@@ -154,6 +168,25 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     right: '23%'
   },
+
+  modalOverlay: { flex: 1, backgroundColor: 'rgba(0, 0, 0, 0.5)', justifyContent: 'flex-start' },
+  sidebar: { width: '70%', backgroundColor: '#fff', height: '100%', padding: 20, borderTopRightRadius: 20, borderBottomRightRadius: 20 },
+  sidebarProfile: { alignItems: 'center', marginBottom: 20 },
+  sidebarProfilePic: { width: 60, height: 60, borderRadius: 30 },
+  sidebarProfileName: { fontSize: 16, fontWeight: 'bold' },
+  sidebarProfileEmail: { fontSize: 14, color: '#555' },
+  sidebarItem: { flexDirection: 'row', alignItems: 'center', paddingVertical: 15 },
+  sidebarText: { fontSize: 16, marginLeft: 10 },
+  profileCard: { alignItems: 'center', backgroundColor: '#fff', padding: 20, borderRadius: 10, marginBottom: 20 },
+  profilePic: { width: 80, height: 80, borderRadius: 40, marginBottom: 10 },
+  profileName: { fontSize: 18, fontWeight: 'bold' },
+  profileEmail: { fontSize: 14, color: '#555' },
+
+
+  announcementContainer: { backgroundColor: '#ffdd57', padding: 15, margin: 20, borderRadius: 10 },
+  announcementTitle: { fontSize: 18, fontWeight: 'bold', color: '#333' },
+  announcementText: { fontSize: 14, color: '#555', marginTop: 5 },
+  
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0, 0, 0, 0.5)', justifyContent: 'flex-start' },
   sidebar: { width: '70%', backgroundColor: '#fff', height: '100%', padding: 20, borderTopRightRadius: 20, borderBottomRightRadius: 20 },
   sidebarTitle: { fontSize: 20, fontWeight: 'bold', marginBottom: 10 },
