@@ -22,18 +22,21 @@ This capstone project is designed to develop a comprehensive postpaid management
    git clone https://github.com/Amitred11/Fibear-Network-App.git
    cd Fibear-Network-App
    ```
-2. **Install Dependencies**
+
+   or
+   Download the **ZIP**, and open it in **VSCODE**
+3. **Install Dependencies**
    ```sh
    npm install
    ```
-3. **Setup Firebase**
+4. **Setup Firebase**
    - Create a Firebase project at [Firebase Console](https://console.firebase.google.com/)
    - Add the Firebase config to `firebaseConfig.js`
    - Enable **Authentication** (Email/Password)
    - Set up **Realtime Database**
    - Configure **Storage Rules**
 
-4. **Run the Project**
+5. **Run the Project**
    ```sh
    npx expo start
    ```
