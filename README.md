@@ -55,8 +55,8 @@ This project is expected to be completed within **7 months**, with the following
 
 ## Contributors
 - **Developer:** Leoncio D. Amadore III
-- **Institution:** Colegio de Montalban
-
+- **College:** Colegio de Montalban
+  - **Institute:** Computing Studies
 ## License
 This project is for educational purposes only. All rights reserved by Fibear Network Technologies Corp.
 
