@@ -1,4 +1,4 @@
-# Fibear Network Technologies Corp. - Postpaid Management System (Mobile App)
+# Postpaid Internet Subscription Management System
 
 ## Project Overview
 This capstone project is designed to develop a comprehensive postpaid management system for Fibear Network Technologies Corp. The system will allow users to manage their internet subscription plans, view billing details, track payment history, and receive important notifications.
