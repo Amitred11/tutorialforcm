@@ -40,6 +40,10 @@ This capstone project is designed to develop a comprehensive postpaid management
    ```sh
    npx expo start
    ```
+   or
+   ```sh
+   npm start
+   ```
 
 ## Development Timeline
 This project is expected to be completed within **7 months**, with the following milestones:
