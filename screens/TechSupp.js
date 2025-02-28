@@ -63,7 +63,7 @@ export default function TechnicalSupport({ navigation }) {
       <Modal visible={sidebarVisible} transparent>
         <TouchableOpacity style={styles.modalOverlay} onPress={() => setSidebarVisible(false)}>
           <View style={styles.sidebar}> 
-            <TouchableOpacity onPress={() => setSidebarVisible(false)} style={styles.closeButton}>
+            <TouchableOpacity onPress={() => setSidebarVisible(false)} style={styles.close}>
               <Ionicons name="close" size={28} color="#333" left="86%" />
             </TouchableOpacity>
             <View style={styles.sidebarProfile}>

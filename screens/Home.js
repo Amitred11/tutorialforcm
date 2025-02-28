@@ -99,9 +99,17 @@ export default function Home({ navigation }) {
         
         {/* Quick Actions */}
         <View style={styles.quickActions}>
-          {["Pay Now", "Upgrade Plan", "Customer Support"].map((text, index) => (
-            <TouchableOpacity key={index} style={styles.actionButton}>
-              <MaterialIcons name={text === "Pay Now" ? "payment" : text === "Upgrade Plan" ? "speed" : "support-agent"} size={28} color="#0044cc" />
+          {[
+            { text: "Pay Now", icon: "payment", screen: "Bills" },
+            { text: "Upgrade Plan", icon: "speed", screen: "Account" },
+            { text: "Customer Support", icon: "support-agent", screen: "TechSupp" }
+          ].map(({ text, icon, screen }, index) => (
+            <TouchableOpacity 
+              key={index} 
+              style={styles.actionButton} 
+              onPress={() => navigation.navigate(screen)}
+            >
+              <MaterialIcons name={icon} size={28} color="#0044cc" />
               <Text style={styles.actionText}>{text}</Text>
             </TouchableOpacity>
           ))}
