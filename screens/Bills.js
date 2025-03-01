@@ -1,11 +1,17 @@
-import React, {useState} from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView, StatusBar, Modal, Image } from 'react-native';
-import { Ionicons, MaterialIcons, FontAwesome5 } from '@expo/vector-icons';
+import React, { useState } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView, StatusBar, Modal, Image, TextInput } from 'react-native';
+import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { auth } from '../config/firebaseConfig';
 
 export default function Bill({ navigation }) {
     const [sidebarVisible, setSidebarVisible] = useState(false);
+    const [upgradeModalVisible, setUpgradeModalVisible] = useState(false);
+    const [paymentModalVisible, setPaymentModalVisible] = useState(false);
+    const [currentPlan, setCurrentPlan] = useState('FiberX 500 Mbps');
+    const [selectedPlan, setSelectedPlan] = useState(null);
+    const [paymentMethod, setPaymentMethod] = useState('');
+    const [accountNumber, setAccountNumber] = useState('');
     const [profileName] = useState(auth.currentUser?.displayName || 'User');
     const [profileEmail] = useState(auth.currentUser?.email || 'No email available');
     const [profileImage] = useState(require('../assets/profile.jpg'));
@@ -16,7 +22,16 @@ export default function Bill({ navigation }) {
       { id: 3, date: 'Nov 15, 2023', amount: '₱2,499', status: 'Paid' },
     ];
   
+    const availablePlans = [
+      { name: 'FiberX 500 Mbps', price: '₱2,499' },
+      { name: 'FiberX 1 Gbps', price: '₱3,999' },
+      { name: 'FiberX 2 Gbps', price: '₱5,999' }
+  ];
 
+  const upgradePlan = (plan) => {
+      setCurrentPlan(plan.name);
+      setUpgradeModalVisible(false);
+  };
     const toggleSidebar = (isOpen) => {
       setSidebarVisible(isOpen);
     };
@@ -78,9 +93,12 @@ export default function Bill({ navigation }) {
             <Text style={styles.usage}>Billing Cycle: <Text style={styles.bold}>15th of Every Month</Text></Text>
             <Text style={styles.usage}>Amount Due: <Text style={styles.balance}>₱2,499</Text></Text>
             <Text style={styles.usage}>Due Date: <Text style={styles.warning}>March 15, 2025</Text></Text>
-            <TouchableOpacity style={styles.button}>
-              <Text style={styles.buttonText}>Pay Now</Text>
-            </TouchableOpacity>
+            <TouchableOpacity style={styles.button} onPress={() => setPaymentModalVisible(true)}>
+                            <Text style={styles.buttonText}>Pay Now</Text>
+                        </TouchableOpacity>
+            <TouchableOpacity style={styles.upgradeButton} onPress={() => setUpgradeModalVisible(true)}>
+                            <Text style={styles.upgradeText}>Upgrade Plan</Text>
+                        </TouchableOpacity>
           </View>
           
           {/* Payment Methods */}
@@ -106,6 +124,52 @@ export default function Bill({ navigation }) {
           </View>
         ))}
         </View>
+
+        <Modal visible={upgradeModalVisible} transparent>
+                <View style={styles.modalContainer}>
+                    <View style={styles.modalContent}>
+                        <Text style={styles.modalTitle}>Choose a New Plan</Text>
+                        {availablePlans.map((plan, index) => (
+                            <TouchableOpacity key={index} style={styles.planOption} onPress={() => upgradePlan(plan)}>
+                                <Text style={styles.planText}>{plan.name} - {plan.price}</Text>
+                            </TouchableOpacity>
+                        ))}
+                        <TouchableOpacity style={styles.closeModal} onPress={() => setUpgradeModalVisible(false)}>
+                            <Text style={styles.closeText}>Cancel</Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+            </Modal>
+            <Modal visible={paymentModalVisible} transparent animationType="slide">
+                <View style={styles.modalContainer}>
+                    <View style={styles.modalContent}>
+                        <Text style={styles.modalTitl}>Select Payment Method</Text>
+                        <TouchableOpacity style={styles.planOption} onPress={() => setPaymentMethod('GCash')}>
+                            <Text style={styles.planText}>GCash</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={styles.planOption} onPress={() => setPaymentMethod('PayPal')}>
+                            <Text style={styles.planText}>PayPal</Text>
+                        </TouchableOpacity>
+                        {paymentMethod !== '' && (
+                            <>
+                                <TextInput 
+                                    placeholder={paymentMethod === 'GCash' ? 'Enter GCash Number' : 'Enter PayPal Email'} 
+                                    style={styles.input} 
+                                    keyboardType={paymentMethod === 'GCash' ? 'numeric' : 'email-address'}
+                                    value={accountNumber} 
+                                    onChangeText={setAccountNumber} 
+                                />
+                                <TouchableOpacity style={styles.button} onPress={() => setPaymentModalVisible(false)}>
+                                    <Text style={styles.buttonText}>Proceed to Pay</Text>
+                                </TouchableOpacity>
+                            </>
+                        )}
+                        <TouchableOpacity onPress={() => setPaymentModalVisible(false)} style={styles.closeModal}>
+                            <Text style={styles.closeText}>Cancel</Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+            </Modal>
       </ScrollView>
     </View>
   );
@@ -219,5 +283,13 @@ const styles = StyleSheet.create({
   },
   unpaid: { 
     color: '#d9534f' 
-  }
+  },
+
+  upgradeButton: { marginTop: 10, padding: 12, borderRadius: 8, alignItems: 'center', backgroundColor: '#28a745' },
+  upgradeText: { color: '#fff', fontWeight: 'bold' }, 
+  modalContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0, 0, 0, 0.5)' },
+  modalContent: { width: '80%', backgroundColor: '#fff', padding: 20, borderRadius: 15, alignItems: 'center', shadowColor: '#000', elevation: 10 },
+  modalTitle: { fontSize: 22, fontWeight: 'bold', marginBottom: 10 },
+  planOption: { padding: 15, borderBottomWidth: 1, borderBottomColor: '#ddd', width: '100%', alignItems: 'center' },
+  closeText: { fontSize: 16, color: 'red' },
 });
