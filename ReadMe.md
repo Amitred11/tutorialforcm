@@ -110,4 +110,4 @@ Your React Native app is now set up! 🚀 Start coding and customizing your proj
 For more details, visit the [React Native documentation](https://reactnative.dev/).  
 ```
 
-This version provides a structured, step-by-step guide. Let me know if you need modifications! 🚀
+IN branch: master has the sample codes
